@@ -14,7 +14,7 @@ section .bss
 
 section .data
     prompt_msg db 'Enter a number >'
-    prompt_len equ $ - prompt_msg         ;; $ = current addr. has <len> from where msg points
+    prompt_len equ $ - prompt_msg         ;; length is offset of current ($) from pointer to prompt_msg
     
 ;;----------------------------------
 
@@ -22,13 +22,22 @@ section .text
     global _start
 
 _start:
-    ;; ---- PROMPT FUNCTION ----
+    ;; ---- CALL PROMPT ----
+    mov r8, num1_buf
+    call prompt
+    mov r8, num2_buf
     call prompt
 
     ;; ---- WRITE TO STDOUT
-    mov rax, 1
-    mov rdi, 1
+    mov rax, SYS_WRITE
+    mov rdi, STDOUT
     mov rsi, num1_buf
+    mov rdx, input_len
+    syscall
+
+    mov rax, SYS_WRITE
+    mov rdi, STDOUT
+    mov rsi, num2_buf
     mov rdx, input_len
     syscall
 
@@ -43,19 +52,19 @@ prompt:
     mov rbp, rsp
     
     ;; ---- PROMPT USER ----
-    mov rax, 1
-    mov rdi, 1
+    mov rax, SYS_WRITE
+    mov rdi, STDOUT
     mov rsi, prompt_msg
     mov rdx, prompt_len
     syscall
     
     ;; ---- READ INPUT ----
-    mov rax, 0
-    mov rdi, 0
-    mov rsi, num1_buf
+    mov rax, SYS_READ
+    mov rdi, STDIN
+    mov rsi, r8
     mov rdx, input_len
     syscall
 
     ;; ---- FUNCTION EPILOGUE ----
-    pop rbp
+    leave                                 ;; Restore rbp                
     ret
