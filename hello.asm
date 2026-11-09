@@ -82,17 +82,27 @@ str_to_int:
         cmp byte [r8], 0
         jne .return
 
-        mul rax, r9
         mov r10b, [r8]
         sub r10b, 48
         
         add rax, r10                      ;; Both must be the same size; r10b is the last byte of r10
-        mul r9
+        imul r9                           ;; Implicit: multiplicand is rax
 
         inc r8
 
         jmp .repeat
 
+    .return:
+        ret
+
+int_to_str:
+    mov r9, 10                            ;; Divisor
+    mov rax, r8                           ;; Running
+    xor rcx, rcx                          ;; Counter for chars
+    
+    .repeat:
+        
+        
     .return:
         ret
 
