@@ -57,10 +57,6 @@ _start:
     jmp exit
 
 prompt:
-    ;; ;; ---- FUNCTION PROLOGUE ----
-    ;; push rbp
-    ;; mov rbp, rsp
-    
     ;; ---- PROMPT USER ----
     mov rax, SYS_WRITE
     mov rdi, STDOUT
@@ -75,10 +71,30 @@ prompt:
     mov rsi, r8                           ;; Save the input to the location passed into r8
     mov rdx, buf_len
     syscall
-    
-    ;; ---- FUNCTION EPILOGUE ----
-    ;; leave                              ;; Restore rbp                
+                            ;; Restore rbp                
     ret
+
+str_to_int:
+    xor rax, rax                          ;; Set to 0
+    mov r9, 10                            ;; Scaling factor
+    
+    .repeat:
+        cmp byte [r8], 0
+        jne .return
+
+        mul rax, r9
+        mov r10b, [r8]
+        sub r10b, 48
+        
+        add rax, r10                      ;; Both must be the same size; r10b is the last byte of r10
+        mul r9
+
+        inc r8
+
+        jmp .repeat
+
+    .return:
+        ret
 
 exit:
     mov rax, SYS_EXIT
